@@ -1,0 +1,30 @@
+// Function to get transaction history from the contract
+async function getTransactionHistory() {
+    const totalTransactions = await contractInstance.methods.transactionHistory.length().call();
+
+    // Retrieve each transaction from the contract
+    const transactions = [];
+    for (let i = 0; i < totalTransactions; i++) {
+        const transaction = await contractInstance.methods.transactionHistory(i).call();
+        transactions.push(transaction);
+    }
+
+    return transactions;
+}
+
+// Function to display transaction history in the UI
+function displayTransactionHistory() {
+    const transactionContainer = document.getElementById("transaction-container");
+
+    // Clear existing transaction history
+    transactionContainer.innerHTML = "";
+
+    // Retrieve transaction history from the contract
+    getTransactionHistory().then((transactions) => {
+        transactions.forEach((transaction) => {
+            const transactionElement = document.createElement("div");
+            transactionElement.innerHTML = `Beneficiary: ${transaction.beneficiary} | Amount: ${transaction.amount} | Timestamp: ${transaction.timestamp}`;
+            transactionContainer.appendChild(transactionElement);
+        });
+    });
+}
