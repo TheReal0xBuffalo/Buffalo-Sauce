@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Time Locked Wallet</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.ethers.io/lib/ethers-5.5.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.4.0/dist/web3.min.js"></script>
+  </head>
+  <body>
+    <h1>Time Locked Wallet</h1>
+
+    <!-- MetaMask Connection -->
+    <button onclick="connectMetaMask()">Connect with MetaMask</button>
+    <br />
+
+    <!-- Notification Preferences -->
+    <div>
+      <h3>Notification Preferences</h3>
+      <label for="enableNotifications">Enable Notifications:</label>
+      <input type="checkbox" id="enableNotifications" />
+      <br />
+      <button onclick="saveNotificationPreferences()">Save</button>
+    </div>
+
+    <!-- OpenSea Assets -->
+    <div>
+      <h3>OpenSea Assets</h3>
+      <button onclick="getOpenSeaAssets()">Fetch OpenSea Assets</button>
+      <ul id="openseaAssets"></ul>
+    </div>
+
+    <!-- Uniswap Prices -->
+    <div>
+      <h3>Uniswap Prices</h3>
+      <button onclick="fetchTokenPrices()">Fetch Token Prices</button>
+      <ul id="tokenPrices"></ul>
+    </div>
+
+    <script>
+      // Contract address and ABI
+      const contractAddress = '<CONTRACT_ADDRESS>';
+      const contractABI = <CONTRACT_ABI>;
+
+      // Ethereum provider
+      let provider;
+      let contract;
+
+      // Check if MetaMask is installed and enable it
+      if (typeof web3 !== 'undefined') {
+        window.ethereum.enable();
+        provider = new ethers.providers.Web3Provider(web3.currentProvider);
+        contract = new ethers.Contract(contractAddress, contractABI, provider.getSigner());
+      } else {
+        alert('Please install MetaMask to use this dApp.');
+      }
+
+      // Function to connect with MetaMask
+      function connectMetaMask() {
+        if (typeof web3 !== 'undefined') {
+          web3.currentProvider.enable();
+          provider = new ethers.providers.Web3Provider(web3.currentProvider);
+          contract = new ethers.Contract(contractAddress, contractABI, provider.getSigner());
+
+          // Perform additional setup after connecting with MetaMask
+          // For example, fetch initial data, update UI, etc.
+        } else {
+          alert('Please install MetaMask to use this dApp.');
+        }
+      }
+
+      // Function to save notification preferences
+      function saveNotificationPreferences() {
+        const enableNotifications = document.getElementById('enableNotifications').checked;
+
+        // Store the notification preferences in the contract or backend
+        // You can use contract methods or make API calls to save the preferences
+      }
+
+      // Function to fetch OpenSea assets
+      async function getOpenSeaAssets() {
+        // Fetch OpenSea assets using the OpenSea API
+        // You can use Axios or any other HTTP client library to make the API call
+        const response = await axios.get('<OPENSEA_API_ENDPOINT>');
+
+        // Process the response and update the UI accordingly
+        // For example
