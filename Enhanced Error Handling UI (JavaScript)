@@ -1,0 +1,18 @@
+// Example error handling in UI code
+function addBeneficiary() {
+    const beneficiaryAddress = getBeneficiaryAddressFromInput();
+
+    // Perform input validation or checks
+    if (!beneficiaryAddress) {
+        displayErrorMessage("Invalid beneficiary address");
+        return;
+    }
+
+    // Call contract function
+    try {
+        await contractInstance.methods.addBeneficiary(beneficiaryAddress).send({ from: userAddress });
+        displaySuccessMessage("Beneficiary added successfully");
+    } catch (error) {
+        displayErrorMessage(error.message);
+    }
+}
