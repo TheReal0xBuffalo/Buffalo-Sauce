@@ -1,0 +1,68 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract WillContract {
+    // Event to log beneficiary additions
+    event BeneficiaryAdded(address indexed beneficiary);
+
+    // Event to log beneficiary updates
+    event BeneficiaryUpdated(address indexed oldBeneficiary, address indexed newBeneficiary);
+
+    // Event to log fund releases
+    event FundsReleased(address indexed beneficiary, uint256 amount);
+
+    // Array to store transaction history
+    struct Transaction {
+        address beneficiary;
+        uint256 amount;
+        uint256 timestamp;
+    }
+    Transaction[] public transactionHistory;
+
+    // Function to add a beneficiary
+    function addBeneficiary(address _beneficiary) public {
+        // Perform validation or checks
+        require(_beneficiary != address(0), "Invalid beneficiary address");
+
+        // Add beneficiary logic
+        // ...
+
+        // Emit beneficiary added event
+        emit BeneficiaryAdded(_beneficiary);
+
+        // Add transaction to history
+        transactionHistory.push(Transaction(_beneficiary, 0, block.timestamp));
+    }
+
+    // Function to update a beneficiary
+    function updateBeneficiary(address _oldBeneficiary, address _newBeneficiary) public {
+        // Perform validation or checks
+        // ...
+
+        // Update beneficiary logic
+        // ...
+
+        // Emit beneficiary updated event
+        emit BeneficiaryUpdated(_oldBeneficiary, _newBeneficiary);
+
+        // Add transaction to history
+        transactionHistory.push(Transaction(_newBeneficiary, 0, block.timestamp));
+    }
+
+    // Function to release funds
+    function releaseFunds(address _beneficiary, uint256 _amount) public {
+        // Perform validation or checks
+        // ...
+
+        // Release funds logic
+        // ...
+
+        // Emit funds released event
+        emit FundsReleased(_beneficiary, _amount);
+
+        // Add transaction to history
+        transactionHistory.push(Transaction(_beneficiary, _amount, block.timestamp));
+    }
+
+    // ...
+}
