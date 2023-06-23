@@ -1,0 +1,69 @@
+pragma solidity ^0.8.0;
+
+contract TimeLockedWallet {
+    address payable public beneficiary;
+    uint256 public releaseTime;
+    uint256 public amount;
+    bool public isReleased;
+    bool public isPrivate;
+
+    mapping(address => bool) public editors;
+
+    constructor(
+        address payable _beneficiary,
+        uint256 _releaseTime,
+        bool _isPrivate
+    ) payable {
+        require(_releaseTime > block.timestamp, "Release time must be in the future");
+        beneficiary = _beneficiary;
+        releaseTime = _releaseTime;
+        amount = msg.value;
+        isReleased = false;
+        isPrivate = _isPrivate;
+        editors[_beneficiary] = true; // Beneficiary is an initial editor
+    }
+
+    modifier onlyEditor() {
+        require(editors[msg.sender], "Only authorized editors can modify the time release");
+        _;
+    }
+
+    modifier onlyOwner() {
+        require(msg.sender == beneficiary, "Only the wallet owner can call this function");
+        _;
+    }
+
+    function releaseFunds() public {
+        require(isReleased, "Funds release has not been authorized");
+        require(amount > 0, "No funds to release");
+
+        uint256 transferAmount = amount;
+        amount = 0;
+        beneficiary.transfer(transferAmount);
+    }
+
+    function setTimeRelease(uint256 _releaseTime) public onlyEditor {
+        require(_releaseTime > block.timestamp, "Release time must be in the future");
+
+        releaseTime = _releaseTime;
+        isReleased = false;
+    }
+
+    function authorizeEditor(address _editor) public onlyOwner {
+        editors[_editor] = true;
+    }
+
+    function revokeEditorAuthorization(address _editor) public onlyOwner {
+        require(_editor != beneficiary, "Beneficiary authorization cannot be revoked");
+
+        delete editors[_editor];
+    }
+
+    function setPrivate(bool _isPrivate) public onlyOwner {
+        isPrivate = _isPrivate;
+    }
+
+    function getRemainingFunds() public view returns (uint256) {
+        return amount;
+    }
+}
