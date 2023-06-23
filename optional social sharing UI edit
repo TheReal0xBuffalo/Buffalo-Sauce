@@ -1,0 +1,114 @@
+// Import necessary dependencies
+
+// Web3 library
+import Web3 from "web3";
+// Contract ABI
+import contractAbi from "./contractAbi.json";
+// MetaMask Onboarding
+import MetaMaskOnboarding from '@metamask/onboarding';
+// OpenSea API
+import { OpenSeaPort, Network } from 'opensea-js';
+// Uniswap API
+import { getTokenPrice } from './uniswapApi';
+// Social sharing library
+import { shareOnTwitter, shareOnFacebook } from './socialSharing';
+
+// Contract Address
+const contractAddress = "<YOUR_CONTRACT_ADDRESS>";
+// Contract ABI
+const contractAbi = <YOUR_CONTRACT_ABI>;
+
+// Initialize MetaMask onboarding
+const onboarding = new MetaMaskOnboarding();
+
+// Initialize Web3
+let web3;
+
+// Check if MetaMask is installed
+if (window.ethereum) {
+  web3 = new Web3(window.ethereum);
+} else {
+  web3 = new Web3(Web3.givenProvider);
+}
+
+// Initialize OpenSea
+const openSeaPort = new OpenSeaPort(web3.currentProvider, {
+  networkName: Network.Rinkeby
+});
+
+// Connect to the contract
+const contract = new web3.eth.Contract(contractAbi, contractAddress);
+
+// Function to connect MetaMask
+async function connectMetaMask() {
+  try {
+    // Request user's permission to connect
+    await ethereum.request({ method: 'eth_requestAccounts' });
+
+    // Get the current account
+    const accounts = await web3.eth.getAccounts();
+    const currentAccount = accounts[0];
+
+    // Show the connected account
+    document.getElementById("connected-account").textContent = currentAccount;
+
+    // Fetch and display asset details
+    await displayAssets(currentAccount);
+
+    // Subscribe to account change events
+    ethereum.on('accountsChanged', (accounts) => {
+      const newAccount = accounts[0];
+      document.getElementById("connected-account").textContent = newAccount;
+      displayAssets(newAccount);
+    });
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Function to display user's assets
+async function displayAssets(account) {
+  // Fetch user's assets from OpenSea
+  const { assets } = await openSeaPort.api.getAssets({ owner: account });
+
+  // Clear existing assets
+  const assetsContainer = document.getElementById("assets-container");
+  assetsContainer.innerHTML = "";
+
+  // Display each asset
+  assets.forEach(asset => {
+    const assetElement = document.createElement("div");
+    assetElement.innerHTML = `
+      <img src="${asset.imageUrl}" alt="${asset.name}" />
+      <p>${asset.name}</p>
+      <p>${asset.description}</p>
+    `;
+    assetsContainer.appendChild(assetElement);
+  });
+}
+
+// Function to fetch and display asset price
+async function displayAssetPrice(assetContractAddress, tokenId) {
+  // Fetch asset price from OpenSea
+  const { currentPrice } = await openSeaPort.getCurrentPrice(assetContractAddress, tokenId);
+
+  // Display the price
+  document.getElementById("asset-price").textContent = currentPrice;
+}
+
+// Function to fetch and display ETH price
+async function displayEthPrice() {
+  // Fetch ETH price from Uniswap
+  const ethPrice = await getTokenPrice("<ETH_TOKEN_ADDRESS>");
+
+  // Display the price
+  document.getElementById("eth-price").textContent = ethPrice;
+}
+
+// Function to fetch and display ERC20 token price
+async function displayTokenPrice(tokenAddress) {
+  // Fetch token price from Uniswap
+  const tokenPrice = await getTokenPrice(tokenAddress);
+
+  // Display the price
+  document.getElementById("token-price").textContent = tokenPrice;
