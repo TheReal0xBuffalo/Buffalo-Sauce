@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Time Locked Wallet UI</title>
+    <script src="https://cdn.ethers.io/lib/ethers-5.5.0.min.js"></script>
+  </head>
+  <body>
+    <h1>Time Locked Wallet UI</h1>
+    
+    <div>
+      <h3>Create Time Locked Wallet</h3>
+      <label for="beneficiaries">Beneficiaries:</label>
+      <textarea id="beneficiaries" rows="3" cols="30"></textarea>
+      <br />
+      <label for="amounts">Amounts:</label>
+      <textarea id="amounts" rows="3" cols="30"></textarea>
+      <br />
+      <label for="releaseTime">Release Time:</label>
+      <input type="datetime-local" id="releaseTime" />
+      <br />
+      <button onclick="createWallet()">Create Wallet</button>
+    </div>
+    
+    <hr />
+    
+    <div>
+      <h3>Release Funds</h3>
+      <button onclick="releaseFunds()">Release Funds</button>
+    </div>
+    
+    <hr />
+    
+    <div>
+      <h3>Set Release Time</h3>
+      <label for="newReleaseTime">New Release Time:</label>
+      <input type="datetime-local" id="newReleaseTime" />
+      <br />
+      <button onclick="setReleaseTime()">Set Release Time</button>
+    </div>
+    
+    <hr />
+    
+    <div>
+      <h3>Add Beneficiary</h3>
+      <label for="newBeneficiary">Beneficiary:</label>
+      <input type="text" id="newBeneficiary" />
+      <br />
+      <label for="newAmount">Amount:</label>
+      <input type="number" id="newAmount" />
+      <br />
+      <button onclick="addBeneficiary()">Add Beneficiary</button>
+    </div>
+
+    <script>
+      // Contract address and ABI
+      const contractAddress = '<CONTRACT_ADDRESS>';
+      const contractABI = <CONTRACT_ABI>;
+
+      // Ethereum provider
+      const provider = new ethers.providers.Web3Provider(web3.currentProvider);
+
+      // Contract instance
+      const contract = new ethers.Contract(contractAddress, contractABI, provider.getSigner());
+
+      // Create wallet
+      async function createWallet() {
+        const beneficiaries = document.getElementById('beneficiaries').value.split('\n');
+        const amounts = document.getElementById('amounts').value.split('\n').map(a => ethers.utils.parseEther(a));
+        const releaseTime = Math.floor(new Date(document.getElementById('releaseTime').value) / 1000);
+
+        try {
+          const tx = await contract.constructor(beneficiaries, amounts, releaseTime);
+          await tx.wait();
+
+          alert('Wallet created successfully!');
+        } catch (error) {
+          console.error('Error creating wallet:', error);
+          alert('Error creating wallet. Please check the console for details.');
+        }
+      }
+
+      // Release funds
+      async function releaseFunds() {
+        try {
+          const tx = await contract.releaseFunds();
+          await tx.wait();
+
+          alert('Funds released successfully!');
+        } catch (error) {
+          console.error('Error releasing funds:', error);
+          alert('Error releasing funds. Please check the console for details.');
+        }
+      }
+
+      // Set release time
+      async function setReleaseTime() {
+        const newReleaseTime = Math.floor(new Date(document.getElementById('newRelease
