@@ -1,0 +1,60 @@
+// Language options
+const supportedLanguages = {
+    en: {
+        welcomeMessage: "Welcome to the Will Contract App!",
+        addBeneficiary: "Add Beneficiary",
+        updateBeneficiary: "Update Beneficiary",
+        releaseFunds: "Release Funds",
+        // ... other English translations
+    },
+    es: {
+        welcomeMessage: "¡Bienvenido a la aplicación de contrato de herencia!",
+        addBeneficiary: "Agregar Beneficiario",
+        updateBeneficiary: "Actualizar Beneficiario",
+        releaseFunds: "Liberar Fondos",
+        // ... other Spanish translations
+    },
+    // Add more language translations as needed
+};
+
+// Function to set the current language
+function setLanguage(language) {
+    // Store the selected language preference in local storage or state
+    // ...
+
+    // Call a function to update the UI elements with the selected language
+    updateUI();
+}
+
+// Function to update the UI elements with the selected language
+function updateUI() {
+    const language = getCurrentLanguage(); // Retrieve the current language preference from local storage or state
+
+    // Update UI elements with the selected language
+    document.getElementById("welcome-message").innerText = supportedLanguages[language].welcomeMessage;
+    document.getElementById("add-beneficiary-btn").innerText = supportedLanguages[language].addBeneficiary;
+    document.getElementById("update-beneficiary-btn").innerText = supportedLanguages[language].updateBeneficiary;
+    document.getElementById("release-funds-btn").innerText = supportedLanguages[language].releaseFunds;
+    // ... update other UI elements with translations
+}
+
+// Function to initialize the UI with the default language
+function initializeUI() {
+    // Retrieve the current language preference from local storage or state
+    const language = getCurrentLanguage();
+
+    // Set the language dropdown to the current language
+    document.getElementById("language-dropdown").value = language;
+
+    // Update UI elements with the current language
+    updateUI();
+}
+
+// Example event listener for language selection
+document.getElementById("language-dropdown").addEventListener("change", (event) => {
+    const selectedLanguage = event.target.value;
+    setLanguage(selectedLanguage);
+});
+
+// Initialize the UI with the default language
+initializeUI();
