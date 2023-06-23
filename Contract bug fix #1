@@ -1,0 +1,21 @@
+pragma solidity ^0.8.0;
+
+contract TimeLock {
+    address payable public beneficiary;
+    uint256 public releaseTime;
+    uint256 public amount;
+
+    constructor(address payable _beneficiary, uint256 _releaseTime, uint256 _amount) {
+        beneficiary = _beneficiary;
+        releaseTime = _releaseTime;
+        amount = _amount;
+    }
+
+    function releaseFunds() public {
+        require(block.timestamp >= releaseTime, "Funds not ready to be released");
+        require(amount > 0, "No funds to release");
+
+        beneficiary.transfer(amount);
+        amount = 0;
+    }
+}
