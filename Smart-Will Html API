@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Time Locked Wallet UI</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.ethers.io/lib/ethers-5.5.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.4.0/dist/web3.min.js"></script>
+  </head>
+  <body>
+    <h1>Time Locked Wallet UI</h1>
+    
+    <div>
+      <h3>Create Time Locked Wallet</h3>
+      <label for="beneficiaries">Beneficiaries:</label>
+      <textarea id="beneficiaries" rows="3" cols="30"></textarea>
+      <br />
+      <label for="amounts">Amounts:</label>
+      <textarea id="amounts" rows="3" cols="30"></textarea>
+      <br />
+      <label for="releaseTime">Release Time:</label>
+      <input type="datetime-local" id="releaseTime" />
+      <br />
+      <button onclick="createWallet()">Create Wallet</button>
+    </div>
+    
+    <hr />
+    
+    <div>
+      <h3>Release Funds</h3>
+      <button onclick="releaseFunds()">Release Funds</button>
+    </div>
+    
+    <hr />
+    
+    <div>
+      <h3>Set Release Time</h3>
+      <label for="newReleaseTime">New Release Time:</label>
+      <input type="datetime-local" id="newReleaseTime" />
+      <br />
+      <button onclick="setReleaseTime()">Set Release Time</button>
+    </div>
+    
+    <hr />
+    
+    <div>
+      <h3>Add Beneficiary</h3>
+      <label for="newBeneficiary">Beneficiary:</label>
+      <input type="text" id="newBeneficiary" />
+      <br />
+      <label for="newAmount">Amount:</label>
+      <input type="number" id="newAmount" />
+      <br />
+      <button onclick="addBeneficiary()">Add Beneficiary</button>
+    </div>
+    
+    <hr />
+    
+    <div>
+      <h3>Assets in Wallet</h3>
+      <button onclick="fetchWalletAssets()">Fetch Wallet Assets</button>
+      <ul id="assetList"></ul>
+    </div>
+
+    <script>
+      // Contract address and ABI
+      const contractAddress = '<CONTRACT_ADDRESS>';
+      const contractABI = <CONTRACT_ABI>;
+
+      // OpenSea API configuration
+      const openSeaApiUrl = 'https://api.opensea.io/api/v1';
+      const openSeaApiKey = '<OPENSEA_API_KEY>';
+
+      // Uniswap API configuration
+      const uniswapApiUrl = 'https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v2';
+
+      // Ethereum provider
+      let provider;
+      let contract;
+
+      // Check if MetaMask is installed
+      if (typeof web3 !== 'undefined') {
+        // Use MetaMask provider
+        window.ethereum.enable();
+        provider = new ethers.providers.Web3Provider(web3.currentProvider);
+        // Set the provider for contract interactions
+        contract = new ethers.Contract(contractAddress, contractABI, provider.getSigner());
+      } else {
+        alert('Please install MetaMask to use this dApp.');
+      }
+
+     
