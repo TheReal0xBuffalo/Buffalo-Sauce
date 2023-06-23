@@ -1,0 +1,106 @@
+pragma solidity ^0.8.0;
+
+interface IERC721 {
+    function ownerOf(uint256 tokenId) external view returns (address owner);
+}
+
+contract TimeLockedWallet {
+    struct Wallet {
+        address payable beneficiary;
+        uint256 amount;
+    }
+
+    Wallet[] public wallets;
+    uint256 public releaseTime;
+    bool public isReleased;
+
+    mapping(address => bool) public editors;
+
+    address public tokenAddress;
+    uint256[] public tokenIds;
+
+    constructor(
+        address payable[] memory _beneficiaries,
+        uint256[] memory _amounts,
+        uint256 _releaseTime,
+        address _tokenAddress,
+        uint256[] memory _tokenIds
+    ) payable {
+        require(_beneficiaries.length == _amounts.length, "Beneficiaries and amounts lengths must match");
+        require(_beneficiaries.length > 0, "At least one beneficiary must be specified");
+        require(_releaseTime > block.timestamp, "Release time must be in the future");
+
+        wallets = new Wallet[](_beneficiaries.length);
+
+        for (uint256 i = 0; i < _beneficiaries.length; i++) {
+            wallets[i] = Wallet(_beneficiaries[i], _amounts[i]);
+        }
+
+        releaseTime = _releaseTime;
+        isReleased = false;
+        editors[msg.sender] = true; // Contract deployer is an initial editor
+
+        tokenAddress = _tokenAddress;
+        tokenIds = _tokenIds;
+    }
+
+    modifier onlyEditor() {
+        require(editors[msg.sender], "Only authorized editors can modify the time release");
+        _;
+    }
+
+    function releaseFunds() external {
+        require(isReleased, "Funds release has not been authorized");
+        require(block.timestamp >= releaseTime, "Release time has not arrived yet");
+        require(hasValidTokenOwnership(), "Token ownership not fulfilled");
+
+        for (uint256 i = 0; i < wallets.length; i++) {
+            uint256 transferAmount = wallets[i].amount;
+            if (transferAmount > 0) {
+                wallets[i].amount = 0;
+                wallets[i].beneficiary.transfer(transferAmount);
+            }
+        }
+    }
+
+    function setTimeRelease(uint256 _releaseTime) external onlyEditor {
+        require(_releaseTime > block.timestamp, "Release time must be in the future");
+
+        releaseTime = _releaseTime;
+        isReleased = false;
+    }
+
+    function authorizeEditor(address _editor) external onlyEditor {
+        editors[_editor] = true;
+    }
+
+    function revokeEditorAuthorization(address _editor) external onlyEditor {
+        delete editors[_editor];
+    }
+
+    function getRemainingFunds(uint256 index) external view returns (uint256) {
+        require(index < wallets.length, "Invalid wallet index");
+
+        return wallets[index].amount;
+    }
+
+    function hasValidTokenOwnership() internal view returns (bool) {
+        if (tokenAddress == address(0)) {
+            return true; // No token gate, ownership check is skipped
+        }
+
+        IERC721 tokenContract = IERC721(tokenAddress);
+
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            if (tokenContract.ownerOf(tokenIds[i]) != address(this)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    function addBeneficiary(address payable _beneficiary, uint256 _amount) external onlyEditor {
+        wallets.push(Wallet(_beneficiary, _amount));
+    }
+}
