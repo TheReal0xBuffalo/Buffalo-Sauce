@@ -1,0 +1,28 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract WillContract {
+    // ...
+
+    // Error event to emit error messages
+    event Error(string message);
+
+    // Function to emit an error message
+    function emitError(string memory errorMessage) private {
+        emit Error(errorMessage);
+    }
+
+    // Example function with error handling
+    function addBeneficiary(address _beneficiary) public {
+        // Perform validation or checks
+        if (_beneficiary == address(0)) {
+            emitError("Invalid beneficiary address");
+            return;
+        }
+
+        // Add beneficiary logic
+        // ...
+    }
+
+    // ...
+}
