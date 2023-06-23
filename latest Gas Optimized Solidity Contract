@@ -1,0 +1,67 @@
+pragma solidity ^0.8.0;
+
+contract WillContract {
+    uint256 private releaseTime;
+    address private owner;
+    mapping(address => bool) private beneficiaries;
+
+    // Event to log fund release
+    event FundsReleased(address indexed beneficiary, uint256 amount);
+
+    // Constructor
+    constructor(uint256 _releaseTime) {
+        owner = msg.sender;
+        releaseTime = _releaseTime;
+    }
+
+    // Modifier to restrict access to the contract owner
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only the contract owner can call this function");
+        _;
+    }
+
+    // Modifier to restrict access to beneficiaries
+    modifier onlyBeneficiary() {
+        require(beneficiaries[msg.sender], "Only beneficiaries can call this function");
+        _;
+    }
+
+    // Function to add a beneficiary
+    function addBeneficiary(address _beneficiary) external onlyOwner {
+        beneficiaries[_beneficiary] = true;
+    }
+
+    // Function to update the release time
+    function updateReleaseTime(uint256 _newReleaseTime) external onlyOwner {
+        require(_newReleaseTime > block.timestamp, "Release time must be in the future");
+        releaseTime = _newReleaseTime;
+    }
+
+    // Function to release funds to beneficiaries
+    function releaseFunds() external onlyBeneficiary {
+        require(block.timestamp >= releaseTime, "Funds cannot be released yet");
+
+        uint256 totalBeneficiaries = getNumberOfBeneficiaries();
+        require(totalBeneficiaries > 0, "No beneficiaries added");
+
+        uint256 amountPerBeneficiary = address(this).balance / totalBeneficiaries;
+
+        for (uint256 i = 0; i < totalBeneficiaries; i++) {
+            address beneficiary = getBeneficiaryAtIndex(i);
+            payable(beneficiary).transfer(amountPerBeneficiary);
+            emit FundsReleased(beneficiary, amountPerBeneficiary);
+        }
+    }
+
+    // Function to get the total number of beneficiaries
+    function getNumberOfBeneficiaries() public view returns (uint256) {
+        // Implement your logic to return the total number of beneficiaries
+        // ...
+    }
+
+    // Function to get the beneficiary address at a specific index
+    function getBeneficiaryAtIndex(uint256 index) public view returns (address) {
+        // Implement your logic to return the beneficiary address at the given index
+        // ...
+    }
+}
